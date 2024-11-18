@@ -1,0 +1,473 @@
+[
+    {
+        "id": "4226cc28b71b3ca6",
+        "type": "mqtt in",
+        "z": "f47011d49732dabe",
+        "name": "parking",
+        "topic": "parking/#",
+        "qos": "2",
+        "datatype": "auto",
+        "broker": "1cfdccd37608b032",
+        "nl": false,
+        "rap": false,
+        "inputs": 0,
+        "x": 210,
+        "y": 740,
+        "wires": [
+            [
+                "ba9b4f7e4d11156b"
+            ]
+        ]
+    },
+    {
+        "id": "ba9b4f7e4d11156b",
+        "type": "switch",
+        "z": "f47011d49732dabe",
+        "name": "Topic Switch",
+        "property": "topic",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "eq",
+                "v": "parking/status",
+                "vt": "str"
+            },
+            {
+                "t": "eq",
+                "v": "parking/rfid",
+                "vt": "str"
+            },
+            {
+                "t": "eq",
+                "v": "parking/alert",
+                "vt": "str"
+            },
+            {
+                "t": "eq",
+                "v": "parking/exit_time",
+                "vt": "str"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 4,
+        "x": 350,
+        "y": 840,
+        "wires": [
+            [
+                "77f7bdd8d9c5b18d"
+            ],
+            [
+                "308276e68f42921b"
+            ],
+            [
+                "8f55312e492f87e9"
+            ],
+            [
+                "066cbeb03bcc95df"
+            ]
+        ]
+    },
+    {
+        "id": "77f7bdd8d9c5b18d",
+        "type": "function",
+        "z": "f47011d49732dabe",
+        "name": "Status Handler",
+        "func": "msg.payload = { status: msg.payload };\nreturn msg;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 580,
+        "y": 920,
+        "wires": [
+            [
+                "7c829fed15cab6d3"
+            ]
+        ]
+    },
+    {
+        "id": "308276e68f42921b",
+        "type": "function",
+        "z": "f47011d49732dabe",
+        "name": "RFID Handler",
+        "func": "var rfid = msg.payload; \nmsg.topic = `SELECT id FROM rfid_cards WHERE rfid = '${rfid}'`; // ใช้การประกอบสตริง\nmsg.params = []; \nreturn msg;\n",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 560,
+        "y": 840,
+        "wires": [
+            [
+                "05298c9484633edc",
+                "ee4afc3e04299cf9"
+            ]
+        ]
+    },
+    {
+        "id": "b57f1cff414cea54",
+        "type": "mysql",
+        "z": "f47011d49732dabe",
+        "mydb": "306888aa2d257f74",
+        "name": "Insert Parking Record",
+        "x": 1240,
+        "y": 980,
+        "wires": [
+            [
+                "7c829fed15cab6d3"
+            ]
+        ]
+    },
+    {
+        "id": "8f55312e492f87e9",
+        "type": "function",
+        "z": "f47011d49732dabe",
+        "name": "Alert Handler",
+        "func": "msg.payload = { alert: msg.payload };\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 670,
+        "y": 1100,
+        "wires": [
+            [
+                "7c829fed15cab6d3"
+            ]
+        ]
+    },
+    {
+        "id": "7c829fed15cab6d3",
+        "type": "debug",
+        "z": "f47011d49732dabe",
+        "name": "Output Debug",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 960,
+        "y": 1060,
+        "wires": []
+    },
+    {
+        "id": "05298c9484633edc",
+        "type": "mysql",
+        "z": "f47011d49732dabe",
+        "mydb": "306888aa2d257f74",
+        "name": "Query RFID",
+        "x": 860,
+        "y": 780,
+        "wires": [
+            [
+                "aba2295a0d1f190a"
+            ]
+        ]
+    },
+    {
+        "id": "ee4afc3e04299cf9",
+        "type": "debug",
+        "z": "f47011d49732dabe",
+        "name": "RFID Query Debug",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 850,
+        "y": 880,
+        "wires": []
+    },
+    {
+        "id": "ab84bf1fb57ee4e2",
+        "type": "inject",
+        "z": "f47011d49732dabe",
+        "name": "Test RFID end",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "parking/exit_time",
+        "payload": "121CD749",
+        "payloadType": "str",
+        "x": 210,
+        "y": 980,
+        "wires": [
+            [
+                "ba9b4f7e4d11156b"
+            ]
+        ]
+    },
+    {
+        "id": "3d30ff0c4af9e836",
+        "type": "inject",
+        "z": "f47011d49732dabe",
+        "name": "Test RFID start",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "parking/rfid",
+        "payload": "121CD749",
+        "payloadType": "str",
+        "x": 220,
+        "y": 920,
+        "wires": [
+            [
+                "ba9b4f7e4d11156b"
+            ]
+        ]
+    },
+    {
+        "id": "066cbeb03bcc95df",
+        "type": "function",
+        "z": "f47011d49732dabe",
+        "name": "Exit Time Handler",
+        "func": "// Query the latest active slot from the database\nmsg.topic = `\n    SELECT slot \n    FROM parking_records \n    WHERE status = 'active' \n    ORDER BY entry_time DESC \n    LIMIT 1\n`;\n\n// Send the query to the MySQL node\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 380,
+        "y": 1200,
+        "wires": [
+            [
+                "025452054487d6ce"
+            ]
+        ]
+    },
+    {
+        "id": "025452054487d6ce",
+        "type": "mysql",
+        "z": "f47011d49732dabe",
+        "mydb": "306888aa2d257f74",
+        "name": "Query Active Slot",
+        "x": 710,
+        "y": 1200,
+        "wires": [
+            [
+                "b72676374ce8f39b"
+            ]
+        ]
+    },
+    {
+        "id": "f6c9ab76ab557bd6",
+        "type": "mysql",
+        "z": "f47011d49732dabe",
+        "mydb": "306888aa2d257f74",
+        "name": "Update Database",
+        "x": 1210,
+        "y": 1180,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "aba2295a0d1f190a",
+        "type": "function",
+        "z": "f47011d49732dabe",
+        "name": "RFID Result Checker",
+        "func": "const rfid = msg.payload;\nlet insertQuery = '';\nif (rfid && rfid.length > 0 && rfid[0].id) {\n    msg.rfid_id = rfid[0].id;\n\n    // Use NOW() for the current timestamp in the SQL query\n    insertQuery = `INSERT INTO parking_records (slot, rfid_id, entry_time) VALUES (1, ${msg.rfid_id}, NOW())`;\n} else {\n    insertQuery = `INSERT INTO parking_records (slot, entry_time) VALUES (1, NOW())`;\n}\nmsg.topic = insertQuery;\n\n// Query to find the RFID card's ID\nmsg.query_topic = `SELECT id FROM rfid_cards WHERE rfid_id = '${rfid}'`;\n\n// Message for LINE Notify\nconst parkingSlot = msg.rfid_id ? 1 : 'ไม่ทราบ'; // Use slot 1 or 'unknown' if no RFID\nconst rfidDisplay = msg.rfid_id || 'ไม่ทราบ';   // Show RFID or 'unknown'\n\n// Using a JavaScript Date object for the LINE Notify message\nconst now = new Date().toLocaleString();\nmsg.payload = {\n    message: `มีรถเข้าจอด:\\nช่องจอด: ${parkingSlot}\\nเวลาเข้า: ${now}`\n};\n\n// Set headers for LINE Notify\nmsg.headers = {\n    'content-type': 'application/x-www-form-urlencoded',\n    'Authorization': 'Bearer 1x6USa5NLpGK8Q6Yr7AIpdd0jYHmDFAV1p7I9PrBAoJ' // Consider securing this token\n};\n\n// Return the message object\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1120,
+        "y": 760,
+        "wires": [
+            [
+                "b57f1cff414cea54",
+                "7c829fed15cab6d3",
+                "4ce64d3b4176cc46",
+                "9fc0b92516cb6abe"
+            ]
+        ]
+    },
+    {
+        "id": "b72676374ce8f39b",
+        "type": "function",
+        "z": "f47011d49732dabe",
+        "name": "Update Exit Time",
+        "func": "// Query to find the RFID card's ID\n\nconst rfid = msg.payload;\nmsg.query_topic = `SELECT id FROM rfid_cards WHERE rfid_id = '${rfid}'`;\n\n// Message for LINE Notify\nconst parkingSlot = msg.rfid_id ? 1 : 'ไม่ทราบ'; // Use slot 1 or 'unknown' if no RFID\nconst rfidDisplay = msg.rfid_id || 'ไม่ทราบ';\nconst MAX_RETRIES = 3;\nconst RETRY_DELAY = 2000;\nmsg.retryCount = msg.retryCount || 0;\n\nif (msg.payload && msg.payload.length > 0 && !msg.error) {\n  const slot = msg.payload[0].slot;\n  const exitTime = new Date().toLocaleString();\n\n  msg.topic = 'UPDATE parking_records SET exit_time = NOW(), duration = TIMESTAMPDIFF(SECOND, entry_time, NOW()), status = \\'completed\\' WHERE slot = ' + slot + ' AND status = \\'active\\' AND exit_time IS NULL';\n  msg.params = [slot];\n  msg.payload = {\n    message: `แจ้งเตือนรถออก:\\nช่องจอด: ${slot}\\nเวลาออก: ${exitTime}`\n  };\n\n  // Set headers for LINE Notify\n  msg.headers = {\n    'content-type': 'application/x-www-form-urlencoded',\n    'Authorization': 'Bearer 1x6USa5NLpGK8Q6Yr7AIpdd0jYHmDFAV1p7I9PrBAoJ' // Secure this token\n  };\n\n  return msg; // Successfully handled, return the message object\n}\n\nif (msg.error) {\n  if (msg.retryCount++ <= MAX_RETRIES) {\n    node.warn('Error occurred: ' + msg.error + '. Retrying operation (' + msg.retryCount + '/' + MAX_RETRIES + ')');\n    setTimeout(() => {\n      if ('ECONNRESET' === msg.error.toString().indexOf('ECONNRESET')) {\n        msg.topic = 'SELECT slot FROM parking_records WHERE status = \\'active\\' ORDER BY entry_time DESC LIMIT 1';\n        delete msg.params;\n      }\n      node.send(msg);\n    }, RETRY_DELAY);\n\n    return null;\n  }\n  node.error('Max retries reached. Last error: ' + msg.error);\n  return null;\n}\n\nnode.warn(\"No active parking records found\");\nreturn null;\n",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 970,
+        "y": 1220,
+        "wires": [
+            [
+                "f6c9ab76ab557bd6",
+                "8853e7bff0738fa9"
+            ]
+        ]
+    },
+    {
+        "id": "2c2942e9d97acb7b",
+        "type": "debug",
+        "z": "f47011d49732dabe",
+        "name": "debug 7",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1440,
+        "y": 1280,
+        "wires": []
+    },
+    {
+        "id": "4ce64d3b4176cc46",
+        "type": "http request",
+        "z": "f47011d49732dabe",
+        "name": "",
+        "method": "POST",
+        "ret": "txt",
+        "paytoqs": "ignore",
+        "url": "https://notify-api.line.me/api/notify",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "insecureHTTPParser": false,
+        "authType": "",
+        "senderr": false,
+        "headers": [],
+        "x": 1430,
+        "y": 900,
+        "wires": [
+            [
+                "69e5e64c4029f24b"
+            ]
+        ]
+    },
+    {
+        "id": "8853e7bff0738fa9",
+        "type": "http request",
+        "z": "f47011d49732dabe",
+        "name": "",
+        "method": "POST",
+        "ret": "txt",
+        "paytoqs": "ignore",
+        "url": "https://notify-api.line.me/api/notify",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "insecureHTTPParser": false,
+        "authType": "",
+        "senderr": false,
+        "headers": [],
+        "x": 1230,
+        "y": 1320,
+        "wires": [
+            [
+                "2c2942e9d97acb7b"
+            ]
+        ]
+    },
+    {
+        "id": "69e5e64c4029f24b",
+        "type": "debug",
+        "z": "f47011d49732dabe",
+        "name": "debug 6",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1640,
+        "y": 740,
+        "wires": []
+    },
+    {
+        "id": "9fc0b92516cb6abe",
+        "type": "debug",
+        "z": "f47011d49732dabe",
+        "name": "debug 8",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1420,
+        "y": 740,
+        "wires": []
+    },
+    {
+        "id": "1cfdccd37608b032",
+        "type": "mqtt-broker",
+        "name": "parking",
+        "broker": "localhost",
+        "port": "1883",
+        "clientid": "",
+        "autoConnect": true,
+        "usetls": false,
+        "protocolVersion": "4",
+        "keepalive": "60",
+        "cleansession": true,
+        "autoUnsubscribe": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthPayload": "",
+        "birthMsg": {},
+        "closeTopic": "",
+        "closePayload": "",
+        "closeMsg": {},
+        "willTopic": "",
+        "willQos": "0",
+        "willPayload": "",
+        "willMsg": {},
+        "userProps": "",
+        "sessionExpiry": ""
+    },
+    {
+        "id": "306888aa2d257f74",
+        "type": "MySQLdatabase",
+        "name": "",
+        "host": "127.0.0.1",
+        "port": "3306",
+        "db": "parking_db",
+        "tz": "",
+        "charset": "UTF8"
+    }
+]
